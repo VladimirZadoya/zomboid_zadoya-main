@@ -1,0 +1,9 @@
+id,name,type_object,condition,amount
+1,Hummer,Tool,Mint,10
+2,Nails,Fasteners,Good,450
+3,Nails,Fasteners,Bad,100
+4,Screwdriver,Tool,Used,25
+5,Bolt,Fasteners,New,200
+6,Hammer,Tool,Mint,50
+7,Nails,Fasteners,Used,300
+8,Drill,Tool,Good,15
