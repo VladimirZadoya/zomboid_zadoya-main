@@ -23,13 +23,15 @@ class CSVFileReader(FileReader):
         self.file_path = path
         self.data: list[dict[str, str | int]] = []
 
-    def read(self) -> list[list[str]]:
+    def read(self) -> list[dict[str, str | int]]:
         try:
             with open(self.file_path, mode='r', encoding='utf-8') as file:
                 reader = csv.DictReader(file)
                 for row in reader:
-                    # Нормалізація ключів до нижнього регістру
-                    normalized_row = {key.lower(): value for key, value in row.items()}
+                    # Нормалізація ключів до нижнього регістру та обробка значень
+                    normalized_row = {
+                        key.lower(): self._convert_value(value) for key, value in row.items()
+                    }
                     self.data.append(normalized_row)
         except FileNotFoundError:
             print(f"File not found: {self.file_path}")

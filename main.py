@@ -5,6 +5,13 @@ from typing import List, Dict
 from pathlib import Path
 
 
+import argparse
+import json
+import csv
+from pathlib import Path
+from typing import List, Dict
+
+
 class FileHandler:
     
     def __init__(self, file_path: Path):
@@ -25,11 +32,11 @@ class FileHandler:
             raise ValueError(f"Неподдерживаемый формат файла: {self.file_path.suffix}")
 
     def _read_json(self) -> List[Dict]:
-        with open(self.file_path, 'r') as f:
+        with open(self.file_path, 'r', encoding='utf-8') as f:
             return json.load(f)
 
     def _read_csv(self) -> List[Dict]:
-        with open(self.file_path, 'r') as f:
+        with open(self.file_path, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             return list(reader)
 
@@ -71,31 +78,29 @@ def print_percentage_results(results: Dict[str, float], filter_name: str = None)
 
 
 def main():
-    import sys
+    parser = argparse.ArgumentParser(description="Анализ данных из файла.")
+    parser.add_argument("file_path", type=Path, help="Путь к файлу (JSON, CSV, XML).")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--percentage-all", action="store_true", help="Показать проценты по условиям для всех предметов.")
+    group.add_argument("--percentage-name", type=str, help="Показать проценты по условиям для предметов с указанным именем.")
 
-    if len(sys.argv) < 2:
-        print("Использование: python script.py <путь_к_файлу> [--percentage-all | --percentage-name <имя>]")
-        sys.exit(1)
-
-    file_path = Path(sys.argv[1])
+    args = parser.parse_args()
 
     try:
-        file_handler = FileHandler(file_path)
+        file_handler = FileHandler(args.file_path)
         analyzer = DataAnalyzer(file_handler.data)
 
-        if "--percentage-all" in sys.argv:
+        if args.percentage_all:
             results = analyzer.get_condition_percentages()
             print_percentage_results(results)
 
-        if "--percentage-name" in sys.argv:
-            name_filter = sys.argv[sys.argv.index("--percentage-name") + 1]
-            results = analyzer.get_condition_percentages(name_filter)
-            print_percentage_results(results, name_filter)
+        if args.percentage_name:
+            results = analyzer.get_condition_percentages(args.percentage_name)
+            print_percentage_results(results, args.percentage_name)
 
     except (FileNotFoundError, ValueError) as e:
         print(f"Ошибка: {e}")
-        sys.exit(1)
-
+        exit(1)
 
 if __name__ == "__main__":
     main()
